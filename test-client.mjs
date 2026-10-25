@@ -60,7 +60,7 @@ const plugin = definition.factory((name) => {
   throw new Error(`unexpected module: ${name}`)
 })
 
-assert.deepEqual(plugin.inject, ['slots'])
+assert.deepEqual(plugin.inject, ['slots', 'configForms'])
 
 const registrations = []
 const locale = { getLocale: () => ({ active: 'zh' }), subscribe: () => () => {} }
@@ -90,16 +90,10 @@ const configForms = {
 const ctx = {
   get: (name) => (name === 'locale' ? locale : undefined),
   slots,
-  inject: (deps, install) => {
-    assert.deepEqual([...deps].sort(), ['configForms', 'slots'])
-    return install({
-      configForms,
-      slots,
-      effect: (installEffect) => {
-        const dispose = installEffect()
-        return typeof dispose === 'function' ? dispose : () => {}
-      },
-    })
+  configForms,
+  effect: (installEffect) => {
+    const dispose = installEffect()
+    return typeof dispose === 'function' ? dispose : () => {}
   },
 }
 

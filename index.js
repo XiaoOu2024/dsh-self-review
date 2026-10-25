@@ -570,4 +570,16 @@ export function apply(ctx, config = {}) {
   ctx.inject(['webServer'], (host) => {
     host.effect(() => registerStatusRoute(host, reviewing))
   })
+  // A linked package's client half is served from an artifact the module registry
+  // captured when the package was first scanned. Publishing the current file on every
+  // activation makes a client edit take effect on the next page load, without a
+  // reinstall and without the dev build watcher.
+  try {
+    const clientModules = ctx.get ? ctx.get('clientModules') : undefined
+    if (clientModules !== undefined && clientModules !== null && typeof clientModules.rebuilt === 'function') {
+      clientModules.rebuilt('dsh-self-review')
+    }
+  } catch {
+    /* the artifact refresh is best-effort; the next boot scans the files again */
+  }
 }

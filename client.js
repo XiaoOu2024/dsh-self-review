@@ -269,6 +269,11 @@ window.__ModuleLoader__.load({
       static getDerivedStateFromError() {
         return { failed: true }
       }
+      componentDidCatch(error) {
+        if (typeof console !== 'undefined' && typeof console.warn === 'function') {
+          console.warn('[dsh-self-review] the settings card failed to render', error)
+        }
+      }
       render() {
         return this.state.failed ? null : this.props.children
       }
@@ -314,7 +319,10 @@ window.__ModuleLoader__.load({
     }
 
     return {
-      inject: ['slots'],
+      // `configForms` is the Host-derived form service; waiting for it as a real
+      // service dependency is what the shipped settings cards do, and it keeps the
+      // card registration correct even when modules load in another order.
+      inject: ['slots', 'configForms'],
       apply(ctx) {
         locale = ctx.get ? ctx.get('locale') : ctx.locale
         ctx.slots.inject('conversation.input.activity', () =>
@@ -323,54 +331,51 @@ window.__ModuleLoader__.load({
             Indicator,
           ),
         )
-        // The settings card needs the Host-derived form service and the page slot;
-        // both are optional so a profile without them keeps the indicator.
-        ctx.inject(['slots', 'configForms'], (scoped) => {
-          const forms = scoped.configForms
-          const form = new primitives.SettingsFormModel(forms.get(SETTINGS_NS), [
-            settingsBooleanField('enabled'),
-            primitives.settingsNumberField('minChars'),
-            primitives.settingsNumberField('maxChars'),
-            primitives.settingsTextField('reviewModel'),
-            primitives.settingsNumberField('digestChars'),
-            primitives.settingsNumberField('timeoutMs'),
-            settingsBooleanField('subagents'),
-            settingsBooleanField('debug'),
-            primitives.settingsTextField('debugFile'),
-          ])
-          const store = form.bind(() => ({
-            ...form.shell(),
-            enabled: form.field('enabled'),
-            minChars: form.field('minChars'),
-            maxChars: form.field('maxChars'),
-            reviewModel: form.field('reviewModel'),
-            digestChars: form.field('digestChars'),
-            timeoutMs: form.field('timeoutMs'),
-            subagents: form.field('subagents'),
-            debug: form.field('debug'),
-            debugFile: form.field('debugFile'),
-          }))
-          scoped.effect(() => () => form.dispose(), 'self-review: settings form subscription')
-          scoped.effect(
-            () =>
-              forms.whileServed([SETTINGS_NS], () =>
-                scoped.slots.inject(SETTINGS_SLOT, () =>
-                  scoped.slots.register(
-                    {
-                      name: SETTINGS_SLOT,
-                      key: SETTINGS_KEY,
-                      inject: () => ({
-                        hooks: { selfReviewCard: store },
-                        ...form.actions(),
-                      }),
-                    },
-                    SettingsCard,
-                  ),
+        const forms = ctx.configForms
+        if (forms === undefined || forms === null) return
+        const form = new primitives.SettingsFormModel(forms.get(SETTINGS_NS), [
+          settingsBooleanField('enabled'),
+          primitives.settingsNumberField('minChars'),
+          primitives.settingsNumberField('maxChars'),
+          primitives.settingsTextField('reviewModel'),
+          primitives.settingsNumberField('digestChars'),
+          primitives.settingsNumberField('timeoutMs'),
+          settingsBooleanField('subagents'),
+          settingsBooleanField('debug'),
+          primitives.settingsTextField('debugFile'),
+        ])
+        const store = form.bind(() => ({
+          ...form.shell(),
+          enabled: form.field('enabled'),
+          minChars: form.field('minChars'),
+          maxChars: form.field('maxChars'),
+          reviewModel: form.field('reviewModel'),
+          digestChars: form.field('digestChars'),
+          timeoutMs: form.field('timeoutMs'),
+          subagents: form.field('subagents'),
+          debug: form.field('debug'),
+          debugFile: form.field('debugFile'),
+        }))
+        ctx.effect(() => () => form.dispose(), 'self-review: settings form subscription')
+        ctx.effect(
+          () =>
+            forms.whileServed([SETTINGS_NS], () =>
+              ctx.slots.inject(SETTINGS_SLOT, () =>
+                ctx.slots.register(
+                  {
+                    name: SETTINGS_SLOT,
+                    key: SETTINGS_KEY,
+                    inject: () => ({
+                      hooks: { selfReviewCard: store },
+                      ...form.actions(),
+                    }),
+                  },
+                  SettingsCard,
                 ),
               ),
-            'self-review: settings card',
-          )
-        })
+            ),
+          'self-review: settings card',
+        )
       },
     }
   },
