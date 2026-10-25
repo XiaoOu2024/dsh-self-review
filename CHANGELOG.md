@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.4.1 — the settings form actually renders
+
+- DSH has no schema-to-form renderer: a bundle must ship a client card. This adds one at
+  `plugins.row.config` (key `dsh-self-review#self-review`) built on the shipped primitives
+  (`SettingsFormModel`, `SettingsForm`, `SettingsValueField`), with checkbox rows for the three
+  switches and number/text rows for the rest.
+- The client module now injects `ui-settings` and `ui-plugin-manager` so the page and its form
+  service exist before the card registers.
+- A render failure inside the card is contained by an error boundary and leaves the page usable.
+
 ## 0.4.0 — settings form
 
 - Settings are declared as a schemastery `Config`; every field is volatile, so the Host

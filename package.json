@@ -1,6 +1,6 @@
 {
   "name": "dsh-self-review",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "type": "module",
   "description": "Holds each final answer before delivery, has an independent minimal-context model call verify it, and releases only the verified text. The user never sees the draft.",
   "license": "MIT",
@@ -51,6 +51,8 @@
       "immediately": true,
       "inject": [
         "@deepseek-ai/dsh-client-ui-conversation",
+        "@deepseek-ai/dsh-client-ui-settings",
+        "@deepseek-ai/dsh-client-ui-plugin-manager",
         "@deepseek-ai/dsh-client-locale"
       ]
     }

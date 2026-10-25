@@ -78,14 +78,18 @@ Client 半（[client.js](client.js)）注册在 `conversation.input.activity`（
 
 ## 配置
 
-九个字段都声明在插件的 schemastery `Config` 里，所以 **Plugins 页 → 我的插件 → 该行** 会有一个
-自动生成的设置表单。每个字段都是 `volatile`，因此：
+九个字段声明在插件的 schemastery `Config` 里：Host 校验配置、填默认值，并把它投影成可编辑的
+表单数据。**表单本身由本包的客户端卡片渲染**（`plugins.row.config`，key
+`dsh-self-review#self-review`，基于 `@deepseek-ai/dsh-client-ui-primitives` 的
+`SettingsFormModel` / `SettingsForm` / `SettingsValueField`）——DSH 不提供 schema 直出表单的渲染器。
 
-- 改动直接写进 profile 的 `cordis.patch.yml`；
+入口：**Plugins 页 → dsh-self-review → 打开该行 → 配置**。每个字段都是 `volatile`，因此：
+
+- 改动写进 profile 的 `cordis.patch.yml`；
 - **立即生效，不重启插件，也不打断正在被扣住的回答**；
 - 默认值只存在于 schema 一处（包的 `cordis.patch.yml` 不再复制一份配置）。
 
-字段描述目前只有英文——Host 投影 JSON Schema 时只取描述字符串（或对象里的 `en`）。
+字段标签跟随界面语言（中/英）；Host 投影的 schema 描述只有英文。
 
 | 键 | 默认 | 含义 |
 |---|---|---|
