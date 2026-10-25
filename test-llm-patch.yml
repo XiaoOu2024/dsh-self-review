@@ -1,0 +1,19 @@
+# Temporary overlay for a live verification run: re-enable the stored DeepSeek
+# account credential in the headless profile, then insert the self-review plugin.
+# Not part of the published package.
+- id: credentials
+  name: '@deepseek-ai/dsh-credentials-local'
+  disabled: false
+- id: deepseek-account
+  name: '@deepseek-ai/dsh-deepseek-account-platform'
+  disabled: false
+- id: self-review
+  name: 'dsh-self-review'
+  config:
+    enabled: true
+    minChars: 50
+    maxChars: 30000
+    digestChars: 4000
+    timeoutMs: 60000
+    subagents: false
+    debug: true

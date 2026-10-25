@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "Hidden Self-Review",
+    "description": "Holds each final answer for an independent second-pass check, then releases only the verified text."
+  }
+}

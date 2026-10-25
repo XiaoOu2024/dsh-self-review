@@ -1,0 +1,12 @@
+- insert:
+    - id: self-review
+      name: 'dsh-self-review'
+      config:
+        enabled: true
+        minChars: 120
+        maxChars: 30000
+        reviewModel: ''
+        digestChars: 4000
+        timeoutMs: 60000
+        subagents: false
+        debug: false

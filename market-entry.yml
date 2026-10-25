@@ -1,0 +1,8 @@
+# 复制到 awesome-dsh-plugin 仓库：data/plugins/<owner>__dsh-self-review.yml
+# 一个 PR 只加这一条；url 必须与 GitHub 仓库完全一致。
+url: https://github.com/<owner>/dsh-self-review
+name: <owner>/dsh-self-review
+category: usage
+description:
+  en: 'Holds every final answer before delivery, has one independent minimal-context model call re-derive and check it, and releases only the verified text; the draft is never shown. Costs one extra model request per reviewed answer and adds a few seconds before the text appears.'
+  zh: '在最终回答送达前先扣住，交给一次独立、最小上下文的模型调用重新推导并校验，只放出校验后的文本，用户看不到草稿。每条被复核的回答多一次模型请求，文字出现前会多几秒。'

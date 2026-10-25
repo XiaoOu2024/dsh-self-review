@@ -1,0 +1,55 @@
+{
+  "name": "dsh-self-review",
+  "version": "0.3.0",
+  "type": "module",
+  "description": "Holds each final answer before delivery, has an independent minimal-context model call verify it, and releases only the verified text. The user never sees the draft.",
+  "license": "MIT",
+  "author": "XiaoOu2024",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/XiaoOu2024/dsh-self-review.git"
+  },
+  "homepage": "https://github.com/XiaoOu2024/dsh-self-review#readme",
+  "bugs": {
+    "url": "https://github.com/XiaoOu2024/dsh-self-review/issues"
+  },
+  "keywords": [
+    "dsh-plugin",
+    "deepseek-harness",
+    "self-review",
+    "verification",
+    "answer-quality",
+    "llm"
+  ],
+  "engines": {
+    "dsh": "=0.2.1-rc.2"
+  },
+  "exports": {
+    ".": "./index.js",
+    "./client": "./client.js",
+    "./locale/*.json": "./locale/*.json",
+    "./icon": "./icon.svg"
+  },
+  "files": [
+    "index.js",
+    "client.js",
+    "cordis.patch.yml",
+    "locale/*.json",
+    "icon.svg",
+    "README.md",
+    "LICENSE"
+  ],
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "platform": "web",
+      "immediately": true,
+      "inject": [
+        "@deepseek-ai/dsh-client-ui-conversation",
+        "@deepseek-ai/dsh-client-locale"
+      ]
+    }
+  }
+}
