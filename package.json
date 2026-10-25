@@ -1,6 +1,6 @@
 {
   "name": "dsh-self-review",
-  "version": "0.4.1",
+  "version": "0.4.2",
   "type": "module",
   "description": "Holds each final answer before delivery, has an independent minimal-context model call verify it, and releases only the verified text. The user never sees the draft.",
   "license": "MIT",

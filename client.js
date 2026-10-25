@@ -135,8 +135,10 @@ window.__ModuleLoader__.load({
 
     /** The Host serves this settings namespace (the plugin row id). */
     const SETTINGS_NS = 'self-review'
-    const SETTINGS_SLOT = 'plugins.row.config'
-    const SETTINGS_KEY = 'dsh-self-review#self-review'
+    // The bundle page renders `plugins.bundle.config` above its rows, so the form sits
+    // directly under the plugin description instead of one click deeper.
+    const SETTINGS_SLOT = 'plugins.bundle.config'
+    const SETTINGS_KEY = 'dsh-self-review'
 
     /** Field copy; the slot's translator wins, this is the fallback. */
     const SETTINGS_TEXT = {

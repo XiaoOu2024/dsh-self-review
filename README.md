@@ -83,9 +83,8 @@ Client 半（[client.js](client.js)）注册在 `conversation.input.activity`（
 `dsh-self-review#self-review`，基于 `@deepseek-ai/dsh-client-ui-primitives` 的
 `SettingsFormModel` / `SettingsForm` / `SettingsValueField`）——DSH 不提供 schema 直出表单的渲染器。
 
-入口是两层：**Plugins 页 → `dsh-self-review` 包 → 它下面的 `self-review` 子组件 → 配置**。
-（插件以 bundle 形式安装，bundle 里有一个同名 row；设置表单挂在 row 上，所以要多点一层。）
-每个字段都是 `volatile`，因此：
+入口：**Plugins 页 → `dsh-self-review` 包**，表单直接显示在描述下方（`plugins.bundle.config`，
+key 为包名），不再需要点进子组件。每个字段都是 `volatile`，因此：
 
 - 改动写进 profile 的 `cordis.patch.yml`；
 - **立即生效，不重启插件，也不打断正在被扣住的回答**；

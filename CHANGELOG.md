@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.4.2 — settings on the bundle page
+
+- The settings card registers at `plugins.bundle.config` (key `dsh-self-review`) instead of the
+  row slot, so the form sits directly under the plugin description instead of one click deeper.
+
 ## 0.4.1 — the settings form actually renders
 
 - DSH has no schema-to-form renderer: a bundle must ship a client card. This adds one at

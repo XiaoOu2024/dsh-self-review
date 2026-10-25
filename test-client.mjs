@@ -66,7 +66,7 @@ const registrations = []
 const locale = { getLocale: () => ({ active: 'zh' }), subscribe: () => () => {} }
 const slots = {
   inject: (slot, install) => {
-    assert.ok(['conversation.input.activity', 'plugins.row.config'].includes(slot), slot)
+    assert.ok(['conversation.input.activity', 'plugins.bundle.config'].includes(slot), slot)
     return install()
   },
   register: (options, component) => {
@@ -105,8 +105,8 @@ const indicator = registrations.find((entry) => entry.options.name === 'conversa
 assert.equal(indicator.options.id, 'self-review-status')
 assert.equal(typeof indicator.component, 'function')
 
-const card = registrations.find((entry) => entry.options.name === 'plugins.row.config')
-assert.equal(card.options.key, 'dsh-self-review#self-review')
+const card = registrations.find((entry) => entry.options.name === 'plugins.bundle.config')
+assert.equal(card.options.key, 'dsh-self-review')
 assert.equal(typeof card.component, 'function')
 
 const injected = card.options.inject()
@@ -115,4 +115,4 @@ for (const action of ['edit', 'resetField', 'save', 'discard']) {
   assert.equal(typeof injected[action], 'function', action)
 }
 
-console.log('client smoke ok: indicator + plugins.row.config#dsh-self-review#self-review')
+console.log('client smoke ok: indicator + plugins.bundle.config#dsh-self-review')
