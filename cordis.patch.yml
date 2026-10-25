@@ -1,12 +1,6 @@
+# Defaults come from the plugin's schemastery `Config`; the Host derives the
+# settings form from the same schema, so this patch stays empty unless a profile
+# wants to pin a value.
 - insert:
     - id: self-review
       name: 'dsh-self-review'
-      config:
-        enabled: true
-        minChars: 120
-        maxChars: 30000
-        reviewModel: ''
-        digestChars: 4000
-        timeoutMs: 60000
-        subagents: false
-        debug: false

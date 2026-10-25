@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.4.0 — settings form
+
+- Settings are declared as a schemastery `Config`; every field is volatile, so the Host
+  derives the Plugin configuration form and edits apply live without a remount.
+- The bundle patch no longer pins defaults: the schema is the single source of truth, and
+  the Loader fills them before `apply`.
+- The stream guard reads the live config per model call, so switching `enabled` off and on
+  again takes effect without reloading the plugin.
+- New dependency: `@deepseek-ai/schemastery` (pure JS, no build step).
+
 ## 0.3.0 — first public release
 
 - Hold the final answer at the `llm/stream` waterfall and release only the verified text.

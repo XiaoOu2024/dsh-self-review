@@ -238,18 +238,46 @@ test('the reviewer route can be overridden by provider/model', async () => {
   assert.equal(reviewerOptions[0].model, 'flash')
 })
 
-test('a disabled plugin leaves the stream untouched', async () => {
-  let registered = false
+test('a disabled plugin passes the stream through, and a volatile flip applies live', async () => {
+  let listener
+  let reviews = 0
+  const enabled = { value: false, get() { return this.value } }
   const ctx = {
-    agents: { get: () => undefined },
-    llm: { stream: () => assert.fail('must not review') },
-    effect: (install) => install(),
-    on: () => {
-      registered = true
+    agents: { get: () => ({ session: { header: {} } }) },
+    llm: {
+      stream: () => {
+        reviews += 1
+        return (async function* () {
+          yield* reviewerChunks('{"verdict":"ok"}')
+        })()
+      },
     },
+    effect: (install) => install(),
+    on: (name, fn) => {
+      listener = fn
+      return () => {}
+    },
+    inject: () => {},
   }
-  apply(ctx, { enabled: false })
-  assert.equal(registered, false)
+  apply(ctx, { enabled })
+  const runOnce = async () => {
+    const out = []
+    for await (const chunk of listener(loopOptions(), () =>
+      (async function* () {
+        yield* answerChunks()
+      })(),
+    )) {
+      out.push(chunk)
+    }
+    return out
+  }
+  const off = await runOnce()
+  assert.equal(reviews, 0)
+  assert.equal(visibleText(off), draft)
+  enabled.value = true
+  const on = await runOnce()
+  assert.equal(reviews, 1)
+  assert.equal(visibleText(on), draft)
 })
 
 /** Invoke the status route with one fake request. */

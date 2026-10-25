@@ -22,34 +22,89 @@
 // answer, not the whole agent context, and the draft itself costs nothing extra —
 // it is not regenerated, only held.
 //
-// No `Config` export on purpose: a declared Config must be a schemastery schema and
-// this package is installed by directory link with no resolvable dependencies. The
-// row's `config` block is merged over DEFAULTS in `apply`.
+// The settings are a schemastery `Config`: the Loader validates the row config and
+// fills defaults before `apply`, and the Host projects the same schema into the form
+// the Plugins page renders (Plugin configuration). One source of truth for both.
 
 import { appendFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
+import z from '@deepseek-ai/schemastery'
 
-/** Defaults for every knob the patch row may override. */
-const DEFAULTS = {
-  /** Master switch. */
-  enabled: true,
-  /** Answers shorter than this are not worth a second call. */
-  minChars: 120,
-  /** Answers longer than this are released unreviewed (a rewrite would be unreliable). */
-  maxChars: 30000,
-  /** `"provider/model"` for the reviewer; empty means "same route as the answer". */
-  reviewModel: '',
-  /** Characters of tool-call evidence to include; 0 disables the digest. */
-  digestChars: 4000,
-  /** Review deadline in milliseconds; the draft is released when it expires. */
-  timeoutMs: 60000,
-  /** Also review delegated subagents' final answers. */
-  subagents: false,
-  /** Append one JSON line per review to `debugFile`. */
-  debug: false,
-  /** Debug log path; empty means `<tmpdir>/dsh-self-review.log`. */
-  debugFile: '',
+/** Plugin settings; the Host derives the live settings form from these volatile fields. */
+export const Config = z.object({
+  enabled: z
+    .boolean()
+    .default(true)
+    .volatile()
+    .description('Master switch. When off, every answer is released without a review.'),
+  minChars: z
+    .number()
+    .min(0)
+    .default(120)
+    .volatile()
+    .description('Answers shorter than this many characters are not reviewed.'),
+  maxChars: z
+    .number()
+    .min(1)
+    .default(30000)
+    .volatile()
+    .description('Answers longer than this are released unreviewed; a full rewrite would be unreliable.'),
+  reviewModel: z
+    .string()
+    .default('')
+    .volatile()
+    .description('Reviewer route as "provider/model". Empty uses the same route as the answer.'),
+  digestChars: z
+    .number()
+    .min(0)
+    .default(4000)
+    .volatile()
+    .description('Characters of tool-call evidence sent with the draft. 0 disables the digest.'),
+  timeoutMs: z
+    .number()
+    .min(1000)
+    .default(60000)
+    .volatile()
+    .description('Review deadline in milliseconds; the draft is released when it expires.'),
+  subagents: z
+    .boolean()
+    .default(false)
+    .volatile()
+    .description("Also review delegated subagents' final answers."),
+  debug: z.boolean().default(false).volatile().description('Append one JSON line per review to the debug log.'),
+  debugFile: z
+    .string()
+    .default('')
+    .volatile()
+    .description('Debug log path. Empty uses the system temp directory.'),
+})
+
+/** Defaults derived from the schema; volatile fields arrive as live boxes. */
+const DEFAULTS = Config['~standard'].validate({}).value
+
+/** Read one config field, unwrapping a live `Volatile` box. */
+function field(config, key) {
+  const box = config !== null && typeof config === 'object' ? config[key] : undefined
+  const value = box !== null && typeof box === 'object' && typeof box.get === 'function' ? box.get() : box
+  if (value !== undefined) return value
+  const fallback = DEFAULTS[key]
+  return fallback !== null && typeof fallback === 'object' && typeof fallback.get === 'function' ? fallback.get() : fallback
+}
+
+/** Snapshot the live config for one model call; a volatile field may change between calls. */
+function snapshot(config) {
+  return {
+    enabled: field(config, 'enabled') !== false,
+    minChars: Number(field(config, 'minChars')),
+    maxChars: Number(field(config, 'maxChars')),
+    reviewModel: String(field(config, 'reviewModel') ?? '').trim(),
+    digestChars: Number(field(config, 'digestChars')),
+    timeoutMs: Number(field(config, 'timeoutMs')),
+    subagents: field(config, 'subagents') === true,
+    debug: field(config, 'debug') === true,
+    debugFile: String(field(config, 'debugFile') ?? ''),
+  }
 }
 
 /** Fixed reviewer instructions. Kept in English so it shares no prefix with user text. */
@@ -83,24 +138,6 @@ Rules:
 - If the draft is empty or clearly not a final answer, return "ok".`
 
 /** Merge the row config over the defaults, coercing each field's type. */
-function normalize(config) {
-  const raw = config !== null && typeof config === 'object' ? config : {}
-  const pick = (key, check, fallback) => (check(raw[key]) ? raw[key] : fallback)
-  const isNum = (v) => typeof v === 'number' && Number.isFinite(v)
-  const isStr = (v) => typeof v === 'string'
-  return {
-    enabled: raw.enabled !== false,
-    minChars: pick('minChars', (v) => isNum(v) && v >= 0, DEFAULTS.minChars),
-    maxChars: pick('maxChars', (v) => isNum(v) && v > 0, DEFAULTS.maxChars),
-    reviewModel: pick('reviewModel', isStr, DEFAULTS.reviewModel).trim(),
-    digestChars: pick('digestChars', (v) => isNum(v) && v >= 0, DEFAULTS.digestChars),
-    timeoutMs: pick('timeoutMs', (v) => isNum(v) && v >= 1000, DEFAULTS.timeoutMs),
-    subagents: raw.subagents === true,
-    debug: raw.debug === true,
-    debugFile: pick('debugFile', (v) => isStr(v) && v.length > 0, DEFAULTS.debugFile),
-  }
-}
-
 /** Join the text blocks of one message or content array. */
 function textOf(content) {
   if (!Array.isArray(content)) return ''
@@ -513,13 +550,14 @@ export const name = 'self-review'
 export const inject = ['agents', 'llm']
 
 export function apply(ctx, config = {}) {
-  const settings = normalize(config)
-  if (!settings.enabled) return
   const reviewing = new Map()
   ctx.effect(() =>
     ctx.on(
       'llm/stream',
       (options, next) => {
+        // Read live: a settings-form edit updates these boxes without a remount.
+        const settings = snapshot(config)
+        if (!settings.enabled) return next()
         const session = liveSession(ctx, options)
         if (session === undefined) return next()
         if (session.header?.origin === 'subagent' && !settings.subagents) return next()

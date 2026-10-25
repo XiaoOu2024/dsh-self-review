@@ -13,7 +13,7 @@
 
 - 安装：`dsh plugin --profile web add dsh-self-review`，然后刷新页面。
 - 卸载：`dsh plugin --profile web remove dsh-self-review`。
-- 依赖：无运行时依赖，纯 JS，安装不需要构建授权。
+- 依赖：唯一运行时依赖 `@deepseek-ai/schemastery`（纯 JS、无构建步骤，安装不需要构建授权）；
 
 ## 兼容性（重要）
 
@@ -76,7 +76,16 @@ Client 半（[client.js](client.js)）注册在 `conversation.input.activity`（
 在会话 `running` 期间每 350ms 轮询一次；一旦 Host 说正在复核，就显示一个旋转环 +「自检中」，
 复核结束、回答放出后自动消失。会话不运行时完全不轮询。
 
-## 配置（`cordis.patch.yml` 的 `config`）
+## 配置
+
+九个字段都声明在插件的 schemastery `Config` 里，所以 **Plugins 页 → 我的插件 → 该行** 会有一个
+自动生成的设置表单。每个字段都是 `volatile`，因此：
+
+- 改动直接写进 profile 的 `cordis.patch.yml`；
+- **立即生效，不重启插件，也不打断正在被扣住的回答**；
+- 默认值只存在于 schema 一处（包的 `cordis.patch.yml` 不再复制一份配置）。
+
+字段描述目前只有英文——Host 投影 JSON Schema 时只取描述字符串（或对象里的 `en`）。
 
 | 键 | 默认 | 含义 |
 |---|---|---|
@@ -90,9 +99,7 @@ Client 半（[client.js](client.js)）注册在 `conversation.input.activity`（
 | `debug` | `false` | 每次复核写一行 JSON 日志 |
 | `debugFile` | 系统临时目录 `dsh-self-review.log` | 日志路径 |
 
-**没有 settings 表单**：本包不声明 schemastery `Config`，所以 Plugins 页里没有可视化配置，
-要改配置就在 profile 的 `cordis.patch.yml` 里加一条 `- id: self-review` 覆盖对应键，然后重载。
-这是当前版本已知的体验短板。
+没有表单的宿主（headless 等）照样读取同一份 schema，只是改配置要手写 profile patch。
 
 ## 代价与限制
 
