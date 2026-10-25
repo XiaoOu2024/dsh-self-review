@@ -9,6 +9,11 @@
 - The client module now injects `ui-settings` and `ui-plugin-manager` so the page and its form
   service exist before the card registers.
 - A render failure inside the card is contained by an error boundary and leaves the page usable.
+- The Host republishes the client artifact on every activation (`clientModules.rebuilt`), so a
+  linked package's client edits reach the browser on the next page load without a reinstall or the
+  dev build watcher.
+- The client half waits for `configForms` as a real service dependency instead of an optional
+  context injection, matching the shipped settings cards.
 
 ## 0.4.0 — settings form
 
