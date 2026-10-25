@@ -24,7 +24,7 @@ GitHub 仓库名建议与包名一致（`dsh-self-review`），并：
 git init
 git add .
 git commit -m "dsh-self-review 0.3.0"
-git remote add origin git@github.com:<owner>/dsh-self-review.git
+git remote add origin git@github.com:XiaoOu2024/dsh-self-review.git
 git push -u origin main
 ```
 
@@ -42,14 +42,14 @@ npm publish
 dsh plugin --profile web add dsh-self-review@0.3.0
 ```
 
-> 包名 `dsh-self-review` 若在 npm 上已被占用，改用带 scope 的名字（如 `@<owner>/dsh-self-review`）。
+> 包名 `dsh-self-review` 若在 npm 上已被占用，改用带 scope 的名字（如 `@XiaoOu2024/dsh-self-review`）。
 > 改包名时**必须同时改** `client.js` 里 `__ModuleLoader__.load({ id: ... })` 的 id，两者必须一致。
 
 ## 3. 收录进市场
 
 社区市场（dshmarket、dshmarket.com、awesome-dsh-plugin.com）的条目来自
 [`awesome-dsh-plugin`](https://github.com/awesome-dsh-plugin/awesome-dsh-plugin) 仓库。
-给它提一个 PR，只加一个文件 `data/plugins/<owner>__dsh-self-review.yml`，内容照
+给它提一个 PR，只加一个文件 `data/plugins/XiaoOu2024__dsh-self-review.yml`，内容照
 [market-entry.yml](market-entry.yml) 抄（`url` 必须与仓库完全一致）。
 
 - 一个 PR 最多 3 条；

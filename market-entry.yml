@@ -1,7 +1,7 @@
-# 复制到 awesome-dsh-plugin 仓库：data/plugins/<owner>__dsh-self-review.yml
+# 复制到 awesome-dsh-plugin 仓库：data/plugins/XiaoOu2024__dsh-self-review.yml
 # 一个 PR 只加这一条；url 必须与 GitHub 仓库完全一致。
-url: https://github.com/<owner>/dsh-self-review
-name: <owner>/dsh-self-review
+url: https://github.com/XiaoOu2024/dsh-self-review
+name: XiaoOu2024/dsh-self-review
 category: usage
 description:
   en: 'Holds every final answer before delivery, has one independent minimal-context model call re-derive and check it, and releases only the verified text; the draft is never shown. Costs one extra model request per reviewed answer and adds a few seconds before the text appears.'
